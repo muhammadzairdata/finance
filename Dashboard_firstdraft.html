@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alpha Trading | August 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080C;
+  --bar: #090C11;
+  --panel: #0D1016;
+  --card: #08090D;
+  --panel-2: #131821;
+  --border: #1D232E;
+  --border-2: #2A3140;
+  --text: #E7EAF0;
+  --muted: #8A93A6;
+  --faint: #5A6376;
+  --blue: #4F78C9;   --blue-t: #5B8CFF;
+  --red: #B9475B;    --red-t: #F0566E;
+  --teal: #4DB396;   --teal-t: #3DDBAA;
+  --gold: #F4B63F;
+  --violet: #7C6CF2;
+  --sky: #45B4E6;
+  --orange: #F08A5D;
+  --grad: linear-gradient(90deg, #4FD1C5 0%, #5B8CFF 100%);
+  --shade: rgba(255,255,255,.035);
+  --sans: "Poppins", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #F3F5F9; --bar: #FFFFFF; --panel: #FFFFFF; --panel-2: #F1F4F9;
+  --card: #F7F9FC;
+  --border: #E2E7EF; --border-2: #CFD6E2; --text: #111827; --muted: #5B6578; --faint: #8A93A6;
+  --blue-t: #2F5FD0; --red-t: #D2334D; --teal-t: #0E9F77; --gold: #D9960F;
+  --shade: rgba(17,24,39,.04);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; -webkit-font-smoothing: antialiased; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--blue-t); outline-offset: 2px; }
+
+/* ---------- Top bar ---------- */
+.topbar { position: sticky; top: 0; z-index: 30; background: var(--bar); border-bottom: 1px solid var(--border); }
+.topbar-in { display: flex; align-items: center; gap: 16px; padding: 10px 24px; }
+.logo { display: flex; align-items: center; gap: 10px; padding-right: 18px; border-right: 1px solid var(--border); }
+.logo-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--grad); display: grid; place-items: center; }
+.logo b { font-size: 14px; font-weight: 600; white-space: nowrap; text-transform: uppercase; letter-spacing: .3px; }
+.tabs { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; scrollbar-width: none; }
+.tabs a { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 12.5px; padding: 7px 16px; border-radius: 7px; white-space: nowrap; text-transform: uppercase; letter-spacing: .4px; }
+.tabs a:hover { color: var(--text); }
+.tabs a.active { background: var(--grad); color: #07111E; font-weight: 600; }
+.actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.updated { color: var(--faint); font-size: 13px; margin-right: 4px; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--text); border: 1px solid var(--border-2); border-radius: 8px; padding: 7px 13px; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; text-transform: uppercase; letter-spacing: .4px; }
+.btn:hover { background: var(--panel-2); }
+.btn svg { width: 14px; height: 14px; }
+.badge { font-size: 11px; font-weight: 700; letter-spacing: .8px; color: var(--blue-t); background: rgba(91,140,255,.12); border: 1px solid rgba(91,140,255,.35); border-radius: 999px; padding: 4px 10px; }
+
+main { padding: 20px 24px 32px; max-width: 1680px; margin: 0 auto; }
+
+/* ---------- Filter bar ---------- */
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 18px; }
+.pill { background: transparent; border: 1px solid var(--border-2); color: var(--text); border-radius: 999px; padding: 7px 18px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.pill[aria-pressed="true"] { border-color: var(--teal-t); color: var(--teal-t); background: rgba(61,219,170,.08); }
+.vsep { width: 1px; height: 26px; background: var(--border-2); margin: 0 4px; }
+.info { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-2); border-radius: 8px; padding: 7px 12px; font-size: 13px; }
+.info span { color: var(--faint); }
+.filters .spacer { flex: 1; }
+.field { display: flex; align-items: center; gap: 9px; border: 1px solid var(--border-2); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+.field label { color: var(--faint); font-size: 12.5px; white-space: nowrap; }
+.field select, .field input[type="date"] {
+  background: transparent; border: 0; color: var(--text); font: inherit; font-size: 13px; font-weight: 500;
+  padding: 2px 0; cursor: pointer; color-scheme: dark;
+}
+:root[data-theme="light"] .field select, :root[data-theme="light"] .field input[type="date"] { color-scheme: light; }
+.field select:focus-visible, .field input[type="date"]:focus-visible { outline: 2px solid var(--blue-t); outline-offset: 2px; border-radius: 4px; }
+.field input[type="date"]::-webkit-calendar-picker-indicator { filter: var(--dp-invert, none); cursor: pointer; opacity: .75; }
+:root:not([data-theme="light"]) .field input[type="date"]::-webkit-calendar-picker-indicator { --dp-invert: invert(1); }
+
+/* ---------- KPI cards ---------- */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 22px; }
+.kpi { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px 16px; overflow: hidden; }
+.kpi::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--c); }
+.kpi-top { display: flex; justify-content: space-between; gap: 16px; }
+.lbl { font-size: 11.5px; font-weight: 600; letter-spacing: 1.1px; text-transform: uppercase; color: var(--muted); }
+.kpi-val { font-family: var(--mono); font-size: 34px; font-weight: 700; color: var(--c); margin: 6px 0 10px; line-height: 1.1; letter-spacing: -.5px; }
+.kpi-val small { font-size: 16px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.deltas { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 6px; font-family: var(--mono); }
+.delta.fav { color: var(--teal-t); background: rgba(61,219,170,.12); }
+.delta.adv { color: var(--red-t); background: rgba(240,86,110,.12); }
+.delta.neu { color: var(--muted); background: var(--panel-2); }
+.delta em { font-style: normal; font-family: var(--sans); font-weight: 400; color: var(--muted); font-size: 11.5px; margin-left: 2px; }
+.gauges { width: 44%; min-width: 150px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.g-row { font-size: 11.5px; color: var(--muted); }
+.g-head { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.g-head b { font-family: var(--mono); color: var(--text); font-weight: 600; }
+.g-track { position: relative; height: 8px; background: var(--panel-2); border-radius: 4px; }
+.g-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: linear-gradient(90deg, transparent, var(--c)); transition: width .4s ease; }
+.g-mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); opacity: .55; border-radius: 1px; }
+.kpi-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border-2); }
+.kpi-foot .pairs { display: flex; gap: 22px; }
+.kpi-foot .val { font-family: var(--mono); font-size: 15px; font-weight: 600; margin-left: 8px; color: var(--text); letter-spacing: 0; text-transform: none; }
+
+/* ---------- Panels ---------- */
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px 20px; min-width: 0; }
+.p-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.p-title { display: flex; align-items: center; gap: 10px; }
+.p-title .ic { border-radius: 7px; display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--border-2); }
+.p-title .ic svg { width: 14px; height: 14px; }
+.p-title .ic { width: 26px; height: 26px; }
+.p-title h2, .p-title h3 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.2px; text-transform: none; color: var(--text); }
+.p-sub { color: var(--faint); font-size: 12.5px; margin: 4px 0 0 36px; }
+.tag { font-size: 11px; color: var(--muted); border: 1px solid var(--border-2); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.seg { display: inline-flex; background: var(--panel-2); border: 1px solid var(--border-2); border-radius: 8px; padding: 3px; flex: none; }
+.seg button { font: inherit; font-size: 12px; font-weight: 500; color: var(--muted); background: none; border: 0; border-radius: 5px; padding: 5px 11px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--text); box-shadow: 0 0 0 1px var(--border-2); }
+.seg button:disabled { opacity: .4; cursor: not-allowed; }
+.wf-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--faint); font-size: 12.5px; text-align: center; padding: 0 20px; }
+.section-label { display: flex; align-items: center; gap: 16px; margin: 46px 0 22px; }
+.section-label .sl-bar { align-self: stretch; width: 4px; border-radius: 2px; background: var(--grad); flex: none; }
+.section-label > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.section-label .sl-kicker { font-size: 11px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); }
+.section-label .sl-heading-row { display: flex; align-items: center; gap: 18px; }
+.section-label h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: var(--text); white-space: nowrap; }
+.section-label .sl-rule { flex: 1; height: 1px; background: var(--border); }
+.row { display: grid; gap: 20px; }
+.r-trading { grid-template-columns: 1.5fr 1fr; }
+.r-two { grid-template-columns: 1fr 1fr; }
+.r-market { grid-template-columns: 1fr 1.4fr; }
+.chart { position: relative; height: 300px; }
+.chart.tall { height: 420px; }
+.chart.mid { height: 250px; }
+.note { font-family: "Poppins", system-ui, Arial, sans-serif; font-size: 13px; font-weight: 400; color: var(--muted); margin: 16px 0 0; line-height: 1.75; letter-spacing: .1px; max-width: none; }
+
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin: 0 0 14px; font-size: 13px; }
+.legend button { background: none; border: 0; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 2px; font-size: 13px; }
+.legend button[aria-pressed="false"] { text-decoration: line-through; opacity: .45; }
+.sw { width: 13px; height: 13px; border-radius: 2px; display: inline-block; }
+.sw.ring { background: transparent !important; border: 2.5px solid var(--gold); }
+.sw.dash { background: transparent !important; border: 2px dashed var(--violet); }
+.sw.dual { background: linear-gradient(90deg, var(--teal-t) 50%, var(--red-t) 50%) !important; border: 0; }
+
+/* Tables */
+.tbl { overflow-x: auto; margin-top: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { color: var(--faint); font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; text-align: right; padding: 9px 10px; border-bottom: 1px solid var(--border-2); white-space: nowrap; }
+td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; padding-left: 0; font-family: var(--sans); font-size: 13px; }
+th:last-child, td:last-child { padding-right: 0; }
+td.dim { color: var(--muted); }
+td.fav { color: var(--teal-t); } td.adv { color: var(--red-t); }
+tr.sub td { background: var(--shade); font-weight: 600; }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--muted); border-bottom: 0; }
+
+/* Mix list */
+.mix { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: center; }
+.mix-list { display: flex; flex-direction: column; gap: 14px; }
+.mix-item { display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.mix-item b { font-family: var(--mono); font-weight: 600; }
+.mix-item span.p { color: var(--muted); font-family: var(--mono); font-size: 12px; margin-left: 8px; }
+.mix-total { border-top: 1px dashed var(--border-2); padding-top: 12px; display: flex; justify-content: space-between; font-size: 13px; }
+.mix-total b { font-family: var(--mono); }
+
+/* Position stats */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.stat { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.stat .v { font-family: var(--mono); font-size: 24px; font-weight: 700; margin: 4px 0 2px; }
+.stat .s { font-size: 12px; color: var(--faint); }
+
+/* Market */
+.idx { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.mkt-charts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin: 16px 0 18px; }
+.mkt-chart-box { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 14px 8px; }
+.mkt-chart-box .lbl { margin-bottom: 6px; }
+@media (max-width: 760px) { .mkt-charts { grid-template-columns: 1fr; } }
+.idx-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.idx-card .v { font-family: var(--mono); font-size: 28px; font-weight: 700; margin: 6px 0 2px; }
+.idx-card .s { font-size: 12px; color: var(--muted); }
+.dbar { position: relative; height: 8px; background: var(--bg); border-radius: 4px; margin-top: 14px; }
+.dbar .mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: var(--muted); }
+.dbar .f { position: absolute; top: 0; bottom: 0; border-radius: 4px; transition: all .4s ease; }
+.dscale { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--faint); margin-top: 5px; font-family: var(--mono); }
+.rank { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 18px 0 4px; font-size: 13px; color: var(--muted); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border-2); display: grid; place-items: center; font-style: normal; font-size: 12px; font-family: var(--mono); color: var(--faint); }
+.dots i.me { background: var(--grad); border: 0; color: #07111E; font-weight: 700; }
+.rank strong { color: var(--text); }
+.fav-t { color: var(--teal-t); } .adv-t { color: var(--red-t); }
+
+footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px 26px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--border); max-width: 1680px; margin: 0 auto; }
+
+/* Responsive */
+@media (max-width: 1280px) { .updated, .logo b { display: none; } }
+@media (max-width: 1100px) {
+  .r-trading, .r-two, .r-market { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 760px) {
+  .topbar-in { flex-wrap: wrap; padding: 10px 14px; }
+  .logo { border: 0; padding: 0; }
+  .tabs { order: 3; width: 100%; }
+  .actions .btn span, .badge { display: none; }
+  main { padding: 14px; }
+  .kpis { grid-template-columns: 1fr; }
+  .kpi-top { flex-direction: column; }
+  .gauges { width: 100%; }
+  .mix { grid-template-columns: 1fr; }
+  .idx { grid-template-columns: 1fr; }
+  .chart.tall { height: 340px; }
+  .panel { padding: 18px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .g-fill, .dbar .f { transition: none; } }
+
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .topbar { position: static; }
+  .actions, .tabs, .filters .pill, .filters .vsep { display: none !important; }
+  .panel, .kpi { break-inside: avoid; }
+  main { padding: 10px 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="logo">
+      <div class="logo-mark"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 13V8M6 13V4M10 13V7M14 13V2" stroke="#07111E" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+      <b>Alpha Trading</b>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#overview" class="active">KPI Overview</a>
+      <a href="#trading">Breakdowns</a>
+      <a href="#owner">Owner &amp; Cash</a>
+      <a href="#position">Position &amp; Market</a>
+    </nav>
+    <div class="actions">
+      <button class="btn" id="btnCsv" title="Download all figures as CSV"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M3 14h10"/></svg><span>CSV</span></button>
+      <button class="btn" id="btnPdf" title="Print or save as PDF"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M3 14h10"/></svg><span>PDF</span></button>
+      <button class="btn" id="btnTheme" title="Switch theme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1"/></svg><span id="themeLbl">Light</span></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Filters -->
+  <div class="filters" role="group" aria-label="Period">
+    <div class="field">
+      <label for="monthSelect">Reporting month</label>
+      <select id="monthSelect">
+        <option value="m" selected>August 2026</option>
+        <option value="y">Year to date, Jan&ndash;Aug 2026</option>
+      </select>
+    </div>
+    <span class="vsep"></span>
+    <div class="field">
+      <label for="dateFrom">From</label>
+      <input type="date" id="dateFrom" value="2026-08-01">
+    </div>
+    <div class="field">
+      <label for="dateTo">To</label>
+      <input type="date" id="dateTo" value="2026-08-31">
+    </div>
+    <button class="btn" id="btnApplyRange" type="button">Apply range</button>
+    <div class="spacer"></div>
+    <div class="info"><span>Currency</span>AED</div>
+  </div>
+
+  <!-- KPIs -->
+  <section id="overview" aria-label="Key performance indicators">
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <!-- Monthly overview -->
+  <section class="panel" aria-labelledby="h-monthly">
+    <div class="p-head">
+      <div>
+        <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M2 12V7M5.5 12V3M9 12V6M12.5 12V9" stroke="#5B8CFF" stroke-width="2" stroke-linecap="round"/></svg></span><h2 id="h-monthly">Monthly Overview</h2></div>
+      </div>
+      <span class="tag">Jan to Aug 2026</span>
+    </div>
+    <div class="legend" id="mainLegend"></div>
+    <div class="chart tall"><canvas id="mainChart" aria-label="Monthly revenue bars with GOP actual and budget lines"></canvas></div>
+    <p class="note">Revenue for January to April comes from the hotel ledger, which ties to the statement at every month end. Operating statements begin in May, so GOP and margin are shown from May.</p>
+  </section>
+
+  <!-- Trading -->
+  <div class="section-label" id="trading"><span class="sl-bar"></span><div><span class="sl-kicker">Section 02</span><div class="sl-heading-row"><h2>Breakdowns</h2><span class="sl-rule"></span></div></div></div>
+  <div class="row r-trading">
+    <section class="panel" aria-labelledby="h-cost">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h4" stroke="#F0566E" stroke-width="2" stroke-linecap="round"/></svg></span><h3 id="h-cost">Cost Breakdown</h3></div>
+        </div>
+        <span class="tag">Aug 2026</span>
+      </div>
+      <div class="chart mid"><canvas id="costChart" aria-label="Cost lines against budget and last year"></canvas></div>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Actual</th><th>Budget</th><th>Var</th><th>Last year</th></tr></thead>
+        <tbody id="costBody"></tbody>
+      </table></div>
+      <p class="note">Four lines by nature, from the operating statement. Staff cost includes accommodation, meals, allowances and visa costs. Green variance means spend below budget.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-mix">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#3DDBAA" stroke-width="2"/><path d="M7 2v5h5" stroke="#3DDBAA" stroke-width="2"/></svg></span><h3 id="h-mix">Revenue Mix</h3></div>
+        </div>
+        <span class="tag" id="mixTag">Aug 2026</span>
+      </div>
+      <div class="mix">
+        <div class="chart" style="height:200px"><canvas id="mixChart" aria-label="Revenue mix by department"></canvas></div>
+        <div class="mix-list" id="mixList"></div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- Owner and cash -->
+  <div class="section-label" id="owner"><span class="sl-bar"></span><div><span class="sl-kicker">Section 03</span><div class="sl-heading-row"><h2>Owner returns &amp; cash</h2><span class="sl-rule"></span></div></div></div>
+  <div class="row r-two">
+    <section class="panel" aria-labelledby="h-owner">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M2 3h3v4H2zM5.5 7h3v2h-3zM9 9h3v3H9z" fill="#F4B63F"/></svg></span><h3 id="h-owner">Owner's Result</h3></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tag" id="ownerTag">Aug 2026</span>
+          <div class="seg" role="group" aria-label="Owner's result period">
+            <button type="button" data-owner-period="m" aria-pressed="true">Month</button>
+            <button type="button" data-owner-period="y" aria-pressed="false">YTD</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart"><canvas id="ownerChart" aria-label="Waterfall from GOP to owner net profit"></canvas></div>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Aug 2026</th><th>Year to date</th></tr></thead>
+        <tbody id="ownerBody"></tbody>
+      </table></div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-cash">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 5.5 6.5 8 9l4-5" stroke="#3DDBAA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 id="h-cash">Cash Flow</h3></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="tag" id="cashTag">Aug 2026</span>
+          <div class="seg" role="group" aria-label="Cash flow period">
+            <button type="button" data-cash-period="m" aria-pressed="true">Month</button>
+            <button type="button" data-cash-period="y" aria-pressed="false" title="Year-to-date cash flow is not in the source report">YTD</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart" id="cashChartWrap"><canvas id="cashChart" aria-label="Waterfall from opening to closing bank"></canvas><div class="wf-msg" id="cashYtdMsg" style="display:none">Year-to-date cash flow isn't included in the source report. Only the August cash flow is available.</div></div>
+      <div class="tbl"><table><tbody id="cashBody"></tbody></table></div>
+      <p class="note" id="cashNote">Direct method, from the hotel's bank and cash accounts. The owner's own bank movements are not in a monthly ledger held by us.</p>
+    </section>
+  </div>
+
+  <!-- Position and market -->
+  <div class="section-label" id="position"><span class="sl-bar"></span><div><span class="sl-kicker">Section 04</span><div class="sl-heading-row"><h2>Position &amp; market</h2><span class="sl-rule"></span></div></div></div>
+  <div class="row r-market">
+    <section class="panel" aria-labelledby="h-pos">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 5h5M7 9h5" stroke="#45B4E6" stroke-width="2" stroke-linecap="round"/></svg></span><h3 id="h-pos">Position at Month End</h3></div>
+        </div>
+        <span class="tag">31 Aug 2026</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="lbl">Total cash at bank</div><div class="v" style="color:var(--teal-t)">9.10</div><div class="s">Free 5.33 plus DSRA restricted 3.77</div></div>
+        <div class="stat"><div class="lbl">Instalment cover</div><div class="v" style="color:var(--gold)">4.2×</div><div class="s">Free cash against 1.26 due</div></div>
+      </div>
+      <div class="chart mid"><canvas id="posChart" aria-label="Month-end balances"></canvas></div>
+      <p class="note">Hotel and owner together, with the balance between them removed. The instalment is one quarter of debt falling due within a year; the operator has not yet given us the repayment schedule. The two summary figures are derived from the lines shown.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="h-mkt">
+      <div class="p-head">
+        <div>
+          <div class="p-title"><span class="ic"><svg viewBox="0 0 14 14" fill="none"><path d="M2 12h10M3.5 12V8M7 12V4M10.5 12V6" stroke="#7C6CF2" stroke-width="2" stroke-linecap="round"/></svg></span><h3 id="h-mkt">Market vs Competitive Set</h3></div>
+        </div>
+        <span class="tag" id="mktTag">Aug 2026</span>
+      </div>
+      <div class="idx" id="idx"></div>
+      <div class="mkt-charts">
+        <div class="mkt-chart-box"><div class="lbl">Occupancy, %</div><div class="chart" style="height:160px"><canvas id="mktOccChart" aria-label="Occupancy, hotel against the competitive set, month and year to date"></canvas></div></div>
+        <div class="mkt-chart-box"><div class="lbl">ADR, AED</div><div class="chart" style="height:160px"><canvas id="mktAdrChart" aria-label="ADR, hotel against the competitive set, month and year to date"></canvas></div></div>
+        <div class="mkt-chart-box"><div class="lbl">RevPAR, AED</div><div class="chart" style="height:160px"><canvas id="mktRevChart" aria-label="RevPAR, hotel against the competitive set, month and year to date"></canvas></div></div>
+      </div>
+      <div class="rank" id="rank"></div>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>Occ % hotel</th><th>Occ % set</th><th>ADR hotel</th><th>ADR set</th><th>RevPAR hotel</th><th>RevPAR set</th><th>Gap</th><th>Rank</th></tr></thead>
+        <tbody id="mktBody"></tbody>
+      </table></div>
+      <p class="note">Competitive set: Competitor 1, Competitor 2, Competitor 3, Competitor 4 and Competitor 5.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span id="footerPeriod">Reporting month: August 2026</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+  /* ================= Data ================= */
+  const KPIS = [
+    { name: 'Revenue', unit: 'AED m', c: '--blue-t', m: { v: '6.10', b: -21, l: -21 }, y: { v: '44.43', b: -38, l: -34 }, bud: '7.76', ly: '7.76' },
+    { name: 'GOP', unit: 'AED m', c: '--teal-t', m: { v: '1.18', b: -41, l: -45 }, y: { v: '9.77', b: -62, l: -61 }, bud: '2.00', ly: '2.13' },
+    { name: 'GOP Margin', unit: '%', pct: true, c: '--gold', m: { v: '19.4', b: -25, l: -29 }, y: { v: '22.0', b: -40, l: -40 }, bud: '25.8', ly: '27.5' },
+    { name: 'Occupancy', unit: '%', pct: true, c: '--violet', m: { v: '74.5', b: -9, l: -13 }, y: { v: '51.6', b: -35, l: -37 }, bud: '81.5', ly: '85.3' },
+    { name: 'ADR', unit: 'AED', c: '--sky', m: { v: '391', b: 0, l: 12 }, y: { v: '510', b: 2, l: 21 }, bud: '392', ly: '350' },
+    { name: 'RevPAR', unit: 'AED', c: '--orange', m: { v: '292', b: -9, l: -2 }, y: { v: '263', b: -34, l: -24 }, bud: '320', ly: '299' }
+  ];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+  const ROOMS = [5.84, 5.42, 2.64, 1.50, 3.41, 1.55, 2.34, 3.75];
+  const FNB   = [3.70, 3.78, 1.77, 1.08, 1.64, 1.09, 1.49, 2.30];
+  const OTHER = [0.40, 0.25, 0.09, 0.06, 0.13, 0.09, 0.06, 0.05];
+  const REV   = ROOMS.map((r, i) => +(r + FNB[i] + OTHER[i]).toFixed(2));
+  const GOP   = [null, null, null, null, 1.22, -0.73, 0.06, 1.18];
+  const GOPB  = [null, null, null, null, 2.56, 1.72, 1.19, 2.00];
+  const MARGIN = GOP.map((g, i) => g == null ? null : (i === 7 ? 19.4 : +(g / REV[i] * 100).toFixed(1)));
+  const COSTS = [
+    { n: 'Food cost', a: 806, b: 1013, v: -20, ly: 958 },
+    { n: 'Staff cost', a: 2620, b: 3064, v: -14, ly: 2888 },
+    { n: 'Utilities', a: 823, b: 1002, v: -18, ly: 964 },
+    { n: 'Others', a: 670, b: 685, v: -2, ly: 815 }
+  ];
+  const OWNER = [
+    { l: 'GOP', t: 'total', m: 1.18, y: 9.77 },
+    { l: 'Operator fee', t: 'delta', m: -0.12, y: -0.84 },
+    { l: 'NOP', t: 'sub', m: 1.06, y: 8.93 },
+    { l: 'Depreciation', t: 'delta', m: -0.67, y: -5.36 },
+    { l: 'Owner exp., hotel books', t: 'delta', m: -0.46, y: -3.40 },
+    { l: 'Owner exp., owner books', t: 'delta', m: -1.44, y: -10.35 },
+    { l: 'Owner net profit', t: 'total', m: -1.51, y: -10.19 }
+  ];
+  const CASH = [
+    { l: 'Opening bank', t: 'total', v: 4.15 },
+    { l: 'Received from guests', t: 'delta', v: 7.58 },
+    { l: 'Operating & govt payments', t: 'delta', v: -5.60 },
+    { l: 'Operator', t: 'delta', v: -0.03 },
+    { l: 'Owners', t: 'delta', v: -0.96 },
+    { l: 'Closing bank', t: 'total', v: 5.15 }
+  ];
+  const POS = [
+    { l: 'Cash at bank, free', v: 5.33 },
+    { l: 'Cash at bank, DSRA', v: 3.77 },
+    { l: 'Next loan instalment', v: -1.26 },
+    { l: 'Receivables', v: 8.89 },
+    { l: 'Payables', v: -22.17 }
+  ];
+  const MKT = {
+    m: { label: 'Month', occ: [74.5, 70.5], adr: [391, 371], rev: [292, 261], gap: 12, rank: 3 },
+    y: { label: 'Year to date', occ: [51.6, 54.1], adr: [510, 492], rev: [263, 266], gap: -1, rank: 3 }
+  };
+
+  /* ================= Helpers ================= */
+  const MINUS = '\u2212';
+  const fmt = (v, d = 2) => (v < 0 ? MINUS : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const sgn = (v, d = 2) => (v > 0 ? '+' : '') + fmt(v, d);
+  const pct = v => (v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v) + '%';
+  const tone = (v, up = true) => v === 0 ? 'neu' : ((v > 0) === up ? 'fav' : 'adv');
+  const arrow = v => v > 0 ? '▲' : v < 0 ? '▼' : '●';
+  const k = n => n.toLocaleString('en-US');
+  const $ = id => document.getElementById(id);
+  let period = 'm';
+  const charts = {};
+  let C = {};
+
+  function readColors() {
+    const s = getComputedStyle(document.documentElement);
+    const g = n => s.getPropertyValue(n).trim();
+    C = {
+      text: g('--text'), muted: g('--muted'), faint: g('--faint'), border: g('--border'), border2: g('--border-2'),
+      panel: g('--panel'), panel2: g('--panel-2'), shade: g('--shade'),
+      blue: g('--blue'), blueT: g('--blue-t'), red: g('--red'), redT: g('--red-t'),
+      teal: g('--teal'), tealT: g('--teal-t'), gold: g('--gold'), violet: g('--violet'), sky: g('--sky'), orange: g('--orange')
+    };
+  }
+  const alpha = (hex, a) => { const n = parseInt(hex.replace('#', ''), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+
+  /* ================= KPI cards ================= */
+  function renderKPIs() {
+    const SCALE = 130;
+    $('kpis').innerHTML = KPIS.map(q => {
+      const d = q[period];
+      const g = (label, v) => {
+        const r = 100 + v;
+        return `<div class="g-row"><div class="g-head"><span>${label}</span><b>${r}%</b></div>
+          <div class="g-track"><span class="g-fill" style="width:${Math.min(r, SCALE) / SCALE * 100}%"></span><span class="g-mark" style="left:calc(${100 / SCALE * 100}% - 1px)"></span></div></div>`;
+      };
+      const foot = period === 'm'
+        ? `<div class="pairs"><span class="lbl">Budget<span class="val">${q.bud}</span></span><span class="lbl">Last year<span class="val">${q.ly}</span></span></div>
+           <span class="lbl">YTD<span class="val">${q.y.v}</span></span>`
+        : `<span class="lbl">Aug 2026 actual</span><span class="val">${q.m.v}${q.pct ? '%' : ''}</span>`;
+      return `<article class="kpi" style="--c:var(${q.c})">
+        <div class="kpi-top">
+          <div>
+            <div class="lbl">${q.name}${q.pct ? '' : ', ' + q.unit}</div>
+            <div class="kpi-val">${d.v}${q.pct ? '<small>%</small>' : ''}</div>
+            <div class="deltas">
+              <span class="delta ${tone(d.b)}">${arrow(d.b)} ${Math.abs(d.b)}%<em>vs bud</em></span>
+              <span class="delta ${tone(d.l)}">${arrow(d.l)} ${Math.abs(d.l)}%<em>vs LY</em></span>
+            </div>
+          </div>
+          <div class="gauges" aria-label="Actual as a share of budget and last year">
+            ${g('Of budget', d.b)}${g('Of last year', d.l)}
+          </div>
+        </div>
+        <div class="kpi-foot">${foot}</div>
+      </article>`;
+    }).join('');
+  }
+
+  /* ================= Tables ================= */
+  function renderTables() {
+    $('costBody').innerHTML = COSTS.map(c =>
+      `<tr><td>${c.n}</td><td>${k(c.a)}</td><td class="dim">${k(c.b)}</td><td class="${tone(c.v, false)}">${pct(c.v)}</td><td class="dim">${k(c.ly)}</td></tr>`
+    ).join('') + `<tr class="tot"><td>Total cost</td><td>4,919</td><td>5,764</td><td class="fav">${pct(-15)}</td><td>5,626</td></tr>`;
+
+    $('ownerBody').innerHTML = OWNER.map((r, i) => {
+      const cls = r.t === 'sub' ? 'sub' : (i === OWNER.length - 1 ? 'tot' : '');
+      const c = v => (r.t !== 'delta' && v < 0) ? 'adv' : '';
+      return `<tr class="${cls}"><td>${r.l}</td><td class="${c(r.m)}">${fmt(r.m)}</td><td class="${c(r.y)}">${fmt(r.y)}</td></tr>`;
+    }).join('');
+
+    $('cashBody').innerHTML = CASH.map((r, i) => {
+      const cls = i === 0 ? 'sub' : (i === CASH.length - 1 ? 'tot' : '');
+      const c = r.t === 'delta' ? (r.v < 0 ? 'adv' : 'fav') : '';
+      return `<tr class="${cls}"><td>${r.l}</td><td class="${c}">${r.t === 'delta' ? sgn(r.v) : fmt(r.v)}</td></tr>`;
+    }).join('');
+
+    $('mktBody').innerHTML = Object.values(MKT).map(r =>
+      `<tr><td>${r.label}</td><td>${r.occ[0].toFixed(1)}</td><td class="dim">${r.occ[1].toFixed(1)}</td><td>${r.adr[0]}</td><td class="dim">${r.adr[1]}</td>
+       <td>${r.rev[0]}</td><td class="dim">${r.rev[1]}</td><td class="${tone(r.gap)}">${pct(r.gap)}</td><td>${r.rank} of 5</td></tr>`).join('');
+  }
+
+  /* ================= Market ================= */
+  function renderMarket() {
+    const r = MKT[period];
+    const defs = [
+      { h: 'Occupancy index', p: r.occ, f: v => v.toFixed(1) + '%' },
+      { h: 'ADR index', p: r.adr, f: v => 'AED ' + v },
+      { h: 'RevPAR index', p: r.rev, f: v => 'AED ' + v }
+    ];
+    $('idx').innerHTML = defs.map(d => {
+      const ix = d.p[0] / d.p[1] * 100;
+      const off = Math.max(-20, Math.min(20, ix - 100)) / 40 * 100;
+      const up = ix >= 100;
+      return `<div class="idx-card"><div class="lbl">${d.h}</div>
+        <div class="v ${up ? 'fav-t' : 'adv-t'}">${ix.toFixed(1)}</div>
+        <div class="s">Hotel ${d.f(d.p[0])}, set ${d.f(d.p[1])}</div>
+        <div class="dbar"><span class="mid"></span><span class="f" style="left:${off >= 0 ? 50 : 50 + off}%;width:${Math.abs(off)}%;background:${up ? 'var(--teal-t)' : 'var(--red-t)'}"></span></div>
+        <div class="dscale"><span>80</span><span>100</span><span>120</span></div></div>`;
+    }).join('');
+    $('rank').innerHTML = `<span class="lbl">Rank in set</span><div class="dots">${[1, 2, 3, 4, 5].map(n => `<i class="${n === r.rank ? 'me' : ''}">${n}</i>`).join('')}</div>
+      <span><strong>${r.rank} of 5</strong>, RevPAR gap to set <strong class="${r.gap >= 0 ? 'fav-t' : 'adv-t'}">${pct(r.gap)}</strong></span>`;
+  }
+
+  /* ================= Revenue mix ================= */
+  function mixData() {
+    const sum = a => a.reduce((s, v) => s + v, 0);
+    const d = period === 'm' ? [ROOMS[7], FNB[7], OTHER[7]] : [sum(ROOMS), sum(FNB), sum(OTHER)];
+    return d.map(v => +v.toFixed(2));
+  }
+  function renderMixList() {
+    const d = mixData(), tot = d.reduce((a, b) => a + b, 0);
+    const cols = [C.blue, C.gold, C.red], names = ['Rooms', 'F&amp;B', 'Other'];
+    $('mixList').innerHTML = d.map((v, i) =>
+      `<div class="mix-item"><span class="sw" style="background:${cols[i]}"></span><span>${names[i]}</span><span><b>${fmt(v)}</b><span class="p">${(v / tot * 100).toFixed(1)}%</span></span></div>`
+    ).join('') + `<div class="mix-total"><span class="lbl">Total revenue</span><b>${fmt(tot)}</b></div>`;
+  }
+
+  /* ================= Chart plugins ================= */
+  const valueLabels = {
+    id: 'valueLabels',
+    afterDatasetsDraw(chart, _a, o) {
+      if (!o || !o.values) return;
+      const { ctx } = chart, meta = chart.getDatasetMeta(0);
+      const horiz = !!o.horizontal, isWF = !!o.totals;
+      ctx.save();
+      ctx.font = '600 11.5px "JetBrains Mono", monospace';
+      if (o.levels) {
+        ctx.strokeStyle = C.faint; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+        if (horiz) {
+          const xs = chart.scales.x;
+          for (let i = 0; i < meta.data.length - 1; i++) {
+            const b = meta.data[i], n = meta.data[i + 1], x = Math.round(xs.getPixelForValue(o.levels[i])) + .5;
+            ctx.beginPath(); ctx.moveTo(x, b.y + b.height / 2); ctx.lineTo(x, n.y - n.height / 2); ctx.stroke();
+          }
+        } else {
+          const ys = chart.scales.y;
+          for (let i = 0; i < meta.data.length - 1; i++) {
+            const b = meta.data[i], n = meta.data[i + 1], y = Math.round(ys.getPixelForValue(o.levels[i])) + .5;
+            ctx.beginPath(); ctx.moveTo(b.x + b.width / 2, y); ctx.lineTo(n.x - n.width / 2, y); ctx.stroke();
+          }
+        }
+        ctx.setLineDash([]);
+      }
+      meta.data.forEach((bar, i) => {
+        const v = o.values[i], total = isWF && o.totals[i];
+        const label = isWF ? (total ? fmt(v) : sgn(v)) : fmt(v);
+        if (horiz) {
+          // Negative bars point left toward the row labels, so their value sits just inside
+          // the bar (near the tip) rather than further left where it would overlap the label.
+          ctx.fillStyle = C.text;
+          ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+          ctx.fillText(label, bar.x + 8, bar.y);
+        } else {
+          // Positive values are labelled above the bar; negative values below it.
+          ctx.fillStyle = total ? C.text : (v < 0 ? C.redT : C.tealT);
+          ctx.textAlign = 'center';
+          if (v < 0) { ctx.textBaseline = 'top'; ctx.fillText(label, bar.x, Math.max(bar.y, bar.base) + 6); }
+          else { ctx.textBaseline = 'bottom'; ctx.fillText(label, bar.x, Math.min(bar.y, bar.base) - 6); }
+        }
+      });
+      ctx.restore();
+    }
+  };
+  const shadeColumn = {
+    id: 'shadeColumn',
+    beforeDatasetsDraw(chart, _a, o) {
+      if (!o || o.index == null) return;
+      const { ctx, chartArea: a, scales: { x } } = chart;
+      const w = x.width / x.ticks.length, cx = x.getPixelForValue(o.index);
+      ctx.save(); ctx.fillStyle = C.shade; ctx.fillRect(cx - w / 2, a.top, w, a.bottom - a.top); ctx.restore();
+    }
+  };
+
+  function waterfall(steps) {
+    let run = 0; const ranges = [], colors = [], values = [], totals = [], levels = [];
+    steps.forEach(s => {
+      if (s.t !== 'delta') {
+        ranges.push([0, s.v]); run = s.v; totals.push(true);
+        colors.push(s.v < 0 ? C.red : (s.t === 'sub' ? alpha(C.teal, .6) : C.teal));
+      } else {
+        ranges.push([run, run + s.v]); run += s.v; totals.push(false);
+        colors.push(s.v < 0 ? C.red : C.teal);
+      }
+      values.push(s.v); levels.push(run);
+    });
+    return { ranges, colors, values, totals, levels };
+  }
+  const wrapLabel = l => { if (l.length < 12) return l; const w = l.split(' '), h = Math.ceil(w.length / 2); return [w.slice(0, h).join(' '), w.slice(h).join(' ')]; };
+
+  function waterfallChart(canvas, labels, wf) {
+    return new Chart(canvas, {
+      type: 'bar',
+      data: { labels: labels.map(wrapLabel), datasets: [{ data: wf.ranges, backgroundColor: wf.colors, borderRadius: 4, barPercentage: .6, categoryPercentage: .9 }] },
+      options: {
+        layout: { padding: { top: 26, bottom: 6 } },
+        scales: {
+          x: { grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, font: { size: 11 } } },
+          y: { grid: { color: c => c.tick && c.tick.value === 0 ? C.border2 : C.border }, border: { display: false }, grace: '18%',
+               ticks: { padding: 8, font: { family: '"JetBrains Mono", monospace', size: 11 }, callback: v => fmt(v, Number.isInteger(v) ? 0 : 1) } }
+        },
+        plugins: {
+          valueLabels: { values: wf.values, totals: wf.totals, levels: wf.levels },
+          tooltip: {
+            callbacks: {
+              title: it => [].concat(it[0].label).join(' ').replace(/,/g, ' '),
+              label: c => {
+                const o = c.chart.options.plugins.valueLabels, v = o.values[c.dataIndex];
+                return o.totals[c.dataIndex] ? ` Balance  AED ${fmt(v)}m` : ` Movement  AED ${sgn(v)}m`;
+              }
+            }
+          }
+        }
+      },
+      plugins: [valueLabels]
+    });
+  }
+
+  /* ================= Build charts ================= */
+  function buildCharts() {
+    Object.values(charts).forEach(c => c.destroy());
+    readColors();
+    Chart.defaults.color = C.muted;
+    Chart.defaults.font.family = '"Poppins", system-ui, Arial, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.borderColor = C.border;
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.plugins.legend.display = false;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) Chart.defaults.animation = false;
+    Object.assign(Chart.defaults.plugins.tooltip, {
+      backgroundColor: C.panel2, borderColor: C.border2, borderWidth: 1, titleColor: C.text, bodyColor: C.text, footerColor: C.muted,
+      padding: 12, cornerRadius: 8, boxPadding: 5, usePointStyle: true,
+      titleFont: { weight: '600' }, bodyFont: { family: '"JetBrains Mono", monospace', size: 12 },
+      footerFont: { family: '"JetBrains Mono", monospace', size: 11.5, weight: '400' }
+    });
+    const monoTicks = { font: { family: '"JetBrains Mono", monospace', size: 11.5 } };
+
+    /* Main monthly chart */
+    charts.main = new Chart($('mainChart'), {
+      data: {
+        labels: MONTHS,
+        datasets: [
+          { type: 'bar', label: 'Rooms', data: ROOMS, backgroundColor: C.blue, stack: 'rev', barPercentage: .78, categoryPercentage: .72, order: 3 },
+          { type: 'bar', label: 'F&B', data: FNB, backgroundColor: C.gold, stack: 'rev', barPercentage: .78, categoryPercentage: .72, order: 3 },
+          { type: 'bar', label: 'Other', data: OTHER, backgroundColor: C.red, stack: 'rev', borderRadius: { topLeft: 4, topRight: 4 }, barPercentage: .78, categoryPercentage: .72, order: 3 },
+          { type: 'bar', label: 'GOP actual', data: GOP, backgroundColor: ctx => (ctx.raw < 0 ? C.red : C.tealT), stack: 'gop-a', borderRadius: 4, barPercentage: .78, categoryPercentage: .72, order: 2 },
+          { type: 'bar', label: 'GOP budget', data: GOPB, backgroundColor: 'transparent', borderColor: C.faint, borderWidth: 2, borderDash: [4, 3], borderSkipped: false,
+            stack: 'gop-b', borderRadius: 4, barPercentage: .78, categoryPercentage: .72, order: 1 },
+          { type: 'line', label: 'GOP margin %', data: MARGIN, yAxisID: 'y2', borderColor: C.gold, backgroundColor: C.gold, borderWidth: 2.5, tension: .35,
+            pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: C.gold, pointBorderColor: C.panel, pointBorderWidth: 2, order: 0, spanGaps: false }
+        ]
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: C.muted, font: { size: 12.5 } } },
+          y: { stacked: true, min: -2, suggestedMax: 11, grid: { color: c => c.tick && c.tick.value === 0 ? C.border2 : C.border }, border: { display: false },
+               ticks: { ...monoTicks, stepSize: 2, padding: 10, callback: v => (v < 0 ? MINUS : '') + Math.abs(v) + 'M' } },
+          y2: { position: 'right', min: -40, max: 120, grid: { display: false }, border: { display: false },
+                ticks: { ...monoTicks, stepSize: 20, color: C.gold, padding: 10, callback: v => (v < 0 ? MINUS : '') + Math.abs(v) + '%' } }
+        },
+        plugins: {
+          tooltip: {
+            filter: i => i.raw != null,
+            itemSort: (a, b) => a.datasetIndex - b.datasetIndex,
+            callbacks: {
+              title: it => it[0].label + ' 2026',
+              label: c => c.dataset.yAxisID === 'y2' ? ` GOP margin       ${fmt(c.raw, 1)}%` : ` ${c.dataset.label.padEnd(12)} AED ${fmt(c.raw)}m`,
+              footer: it => {
+                const i = it[0].dataIndex;
+                return `Total revenue  AED ${fmt(REV[i])}m`;
+              }
+            }
+          }
+        }
+      }
+    });
+    const legendDefs = [
+      { i: 0, label: 'Rooms', col: C.blue },
+      { i: 1, label: 'F&B', col: C.gold },
+      { i: 2, label: 'Other', col: C.red },
+      { i: 3, label: 'GOP actual (green = positive, red = negative)', cls: 'dual' },
+      { i: 4, label: 'GOP budget', cls: 'dash', col: C.faint },
+      { i: 5, label: 'GOP margin %', cls: 'ring', col: C.gold }
+    ];
+    $('mainLegend').innerHTML = legendDefs.map(d => {
+      const style = d.cls === 'dual' ? '' : `style="background:${d.cls ? 'transparent' : (d.col || 'transparent')};border-color:${d.col || C.faint}"`;
+      return `<button type="button" aria-pressed="true" data-i="${d.i}"><span class="sw ${d.cls || ''}" ${style}></span>${d.label}</button>`;
+    }).join('');
+
+    /* Costs */
+    charts.cost = new Chart($('costChart'), {
+      type: 'bar',
+      data: {
+        labels: COSTS.map(c => c.n),
+        datasets: [
+          { label: 'Actual', data: COSTS.map(c => c.a), backgroundColor: C.blue, borderRadius: 3, barPercentage: .85, categoryPercentage: .72 },
+          { label: 'Budget', data: COSTS.map(c => c.b), backgroundColor: alpha(C.violet, .25), borderColor: C.violet, borderWidth: 1.2, borderRadius: 3, barPercentage: .85, categoryPercentage: .72 },
+          { label: 'Last year', data: COSTS.map(c => c.ly), backgroundColor: C.border2, borderRadius: 3, barPercentage: .85, categoryPercentage: .72 }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { grid: { color: C.border }, border: { display: false }, ticks: { ...monoTicks, callback: v => k(v) } },
+          y: { grid: { display: false }, ticks: { color: C.text, font: { size: 12.5 } } }
+        },
+        plugins: {
+          legend: { display: true, position: 'top', align: 'end', labels: { usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 10, boxHeight: 10, color: C.muted, padding: 16 } },
+          tooltip: { callbacks: {
+            label: c => ` ${c.dataset.label.padEnd(10)} ${k(c.raw)}k`,
+            footer: it => { const c = COSTS[it[0].dataIndex]; return `vs budget ${pct(c.v)} (${fmt(c.a - c.b, 0)}k)`; }
+          } }
+        }
+      }
+    });
+
+    /* Revenue mix */
+    charts.mix = new Chart($('mixChart'), {
+      type: 'doughnut',
+      data: { labels: ['Rooms', 'F&B', 'Other'], datasets: [{ data: mixData(), backgroundColor: [C.blue, C.gold, C.red], borderColor: C.panel, borderWidth: 3, hoverOffset: 6 }] },
+      options: { cutout: '68%', plugins: { tooltip: { callbacks: { label: c => ` ${c.label}  AED ${fmt(c.raw)}m` } } } }
+    });
+    renderMixList();
+
+    /* Waterfalls */
+    charts.owner = waterfallChart($('ownerChart'), OWNER.map(r => r.l), waterfall(OWNER.map(r => ({ t: r.t, v: r[period] }))));
+    charts.cash = waterfallChart($('cashChart'), CASH.map(r => r.l), waterfall(CASH));
+
+    /* Position */
+    charts.pos = new Chart($('posChart'), {
+      type: 'bar',
+      data: { labels: POS.map(p => p.l), datasets: [{ data: POS.map(p => p.v), backgroundColor: POS.map(p => p.v < 0 ? C.red : C.teal), borderRadius: 4, barPercentage: .7, categoryPercentage: .85 }] },
+      options: {
+        indexAxis: 'y',
+        layout: { padding: { right: 46 } },
+        scales: {
+          x: { min: -26, max: 12, grid: { color: c => c.tick && c.tick.value === 0 ? C.border2 : C.border }, border: { display: false }, ticks: { ...monoTicks, stepSize: 5, callback: v => fmt(v, 0) } },
+          y: { grid: { display: false }, ticks: { color: C.text, font: { size: 12.5 } } }
+        },
+        plugins: { valueLabels: { values: POS.map(p => p.v), horizontal: true }, tooltip: { callbacks: { label: c => ` AED ${fmt(c.raw)}m` } } }
+      },
+      plugins: [valueLabels]
+    });
+
+    /* Market: Hotel vs Set, Month and YTD — mirrors the table columns directly */
+    const mktMetrics = [
+      { id: 'mktOccChart', hotel: [MKT.m.occ[0], MKT.y.occ[0]], set: [MKT.m.occ[1], MKT.y.occ[1]], vf: v => fmt(v, 1) + '%' },
+      { id: 'mktAdrChart', hotel: [MKT.m.adr[0], MKT.y.adr[0]], set: [MKT.m.adr[1], MKT.y.adr[1]], vf: v => fmt(v, 0) },
+      { id: 'mktRevChart', hotel: [MKT.m.rev[0], MKT.y.rev[0]], set: [MKT.m.rev[1], MKT.y.rev[1]], vf: v => fmt(v, 0) }
+    ];
+    mktMetrics.forEach(m => {
+      charts[m.id] = new Chart($(m.id), {
+        type: 'bar',
+        data: {
+          labels: ['Month', 'Year to date'],
+          datasets: [
+            { label: 'Hotel', data: m.hotel, backgroundColor: C.blue, borderRadius: 4, barPercentage: .55, categoryPercentage: .6 },
+            { label: 'Set', data: m.set, backgroundColor: C.border2, borderRadius: 4, barPercentage: .55, categoryPercentage: .6 }
+          ]
+        },
+        options: {
+          scales: {
+            x: { grid: { display: false }, ticks: { color: C.muted, font: { size: 11.5 } } },
+            y: { grid: { color: C.border }, border: { display: false }, ticks: { ...monoTicks, font: { family: '"JetBrains Mono", monospace', size: 10.5 }, callback: v => m.vf(v) } }
+          },
+          plugins: {
+            legend: { display: true, position: 'top', align: 'end', labels: { usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 8, boxHeight: 8, color: C.muted, padding: 10, font: { size: 11 } } },
+            tooltip: { callbacks: { label: c => ` ${c.dataset.label}  ${m.vf(c.raw)}` } }
+          }
+        }
+      });
+    });
+  }
+
+  /* ================= Period switching ================= */
+  const fmtDate = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  function updateFooter(p) {
+    $('footerPeriod').textContent = p === 'm' ? 'Reporting month: August 2026' : 'Reporting period: January to August 2026 (year to date)';
+  }
+  function setPeriod(p) {
+    period = p;
+    const tag = p === 'm' ? 'Aug 2026' : 'YTD 2026';
+    ['mixTag', 'ownerTag', 'mktTag'].forEach(id => $(id).textContent = tag);
+    $('monthSelect').value = p;
+    document.querySelectorAll('[data-owner-period]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ownerPeriod === p)));
+    updateFooter(p);
+    renderKPIs(); renderMarket(); renderMixList();
+    if (!window.Chart) return;
+    const wf = waterfall(OWNER.map(r => ({ t: r.t, v: r[p] })));
+    charts.owner.data.datasets[0].data = wf.ranges;
+    charts.owner.data.datasets[0].backgroundColor = wf.colors;
+    Object.assign(charts.owner.options.plugins.valueLabels, { values: wf.values, totals: wf.totals, levels: wf.levels });
+    charts.owner.update();
+    charts.mix.data.datasets[0].data = mixData(); charts.mix.update();
+  }
+  $('monthSelect').addEventListener('change', e => setPeriod(e.target.value));
+  $('btnApplyRange').addEventListener('click', () => {
+    const from = $('dateFrom').value, to = $('dateTo').value;
+    if (!from || !to) return;
+    const days = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+    // A single reporting month keeps the monthly figures; any other span reads as year to date.
+    setPeriod(days <= 31 ? 'm' : 'y');
+    $('footerPeriod').textContent = `Reporting period: ${fmtDate(new Date(from))} to ${fmtDate(new Date(to))}`;
+  });
+  document.querySelectorAll('[data-owner-period]').forEach(b => b.addEventListener('click', () => setPeriod(b.dataset.ownerPeriod)));
+
+  document.querySelectorAll('[data-cash-period]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-cash-period]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const ytd = b.dataset.cashPeriod === 'y';
+    $('cashTag').textContent = ytd ? 'YTD 2026' : 'Aug 2026';
+    $('cashChart').style.display = ytd ? 'none' : '';
+    $('cashYtdMsg').style.display = ytd ? 'flex' : 'none';
+  }));
+
+  $('mainLegend').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const i = +b.dataset.i, vis = charts.main.isDatasetVisible(i);
+    charts.main.setDatasetVisibility(i, !vis); charts.main.update();
+    b.setAttribute('aria-pressed', String(!vis));
+  });
+
+  /* ================= Top bar actions ================= */
+  $('btnPdf').addEventListener('click', () => window.print());
+  $('btnTheme').addEventListener('click', () => {
+    const root = document.documentElement, light = root.getAttribute('data-theme') !== 'light';
+    root.setAttribute('data-theme', light ? 'light' : 'dark');
+    $('themeLbl').textContent = light ? 'Dark' : 'Light';
+    if (window.Chart) buildCharts(); else { readColors(); renderMixList(); }
+  });
+  $('btnCsv').addEventListener('click', () => {
+    const rows = [['Section', 'Line', 'Measure', 'Value']];
+    KPIS.forEach(q => rows.push(
+      ['KPIs', q.name, 'Aug 2026 (' + q.unit + ')', q.m.v], ['KPIs', q.name, 'Budget', q.bud], ['KPIs', q.name, 'Last year', q.ly],
+      ['KPIs', q.name, 'Var vs budget %', q.m.b], ['KPIs', q.name, 'Var vs LY %', q.m.l], ['KPIs', q.name, 'YTD', q.y.v],
+      ['KPIs', q.name, 'YTD var vs budget %', q.y.b], ['KPIs', q.name, 'YTD var vs LY %', q.y.l]));
+    MONTHS.forEach((m, i) => {
+      rows.push(['Monthly (AED m)', m, 'Revenue', REV[i]], ['Monthly (AED m)', m, 'Rooms', ROOMS[i]], ['Monthly (AED m)', m, 'F&B', FNB[i]], ['Monthly (AED m)', m, 'Other', OTHER[i]]);
+      if (GOP[i] != null) rows.push(['Monthly (AED m)', m, 'GOP actual', GOP[i]], ['Monthly (AED m)', m, 'GOP budget', GOPB[i]]);
+    });
+    COSTS.forEach(c => rows.push(['Costs Aug (AED 000)', c.n, 'Actual', c.a], ['Costs Aug (AED 000)', c.n, 'Budget', c.b], ['Costs Aug (AED 000)', c.n, 'Last year', c.ly]));
+    OWNER.forEach(r => rows.push(["Owner's result (AED m)", r.l, 'Aug 2026', r.m], ["Owner's result (AED m)", r.l, 'YTD', r.y]));
+    CASH.forEach(r => rows.push(['Cash flow Aug (AED m)', r.l, 'Aug 2026', r.v]));
+    POS.forEach(r => rows.push(['Position 31 Aug (AED m)', r.l, 'Balance', r.v]));
+    Object.values(MKT).forEach(r => rows.push(
+      ['Market', r.label, 'Occ % hotel / set', r.occ.join(' / ')], ['Market', r.label, 'ADR hotel / set', r.adr.join(' / ')],
+      ['Market', r.label, 'RevPAR hotel / set', r.rev.join(' / ')], ['Market', r.label, 'Gap %', r.gap], ['Market', r.label, 'Rank', r.rank + ' of 5']));
+    const csv = rows.map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'board-pack-aug-2026.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  /* ================= Scroll spy ================= */
+  const links = [...document.querySelectorAll('.tabs a')];
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-35% 0px -60% 0px' });
+  ['overview', 'trading', 'owner', 'position'].forEach(id => io.observe($(id)));
+
+  /* ================= Init ================= */
+  readColors();
+  renderKPIs(); renderTables(); renderMarket(); updateFooter('m');
+  if (window.Chart) buildCharts(); else renderMixList();
+})();
+</script>
+</body>
+</html>
